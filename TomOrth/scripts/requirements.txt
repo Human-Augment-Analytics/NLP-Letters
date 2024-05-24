@@ -1,0 +1,10 @@
+pandas
+numpy
+pillow
+matplotlib
+pillow
+wordcloud
+nltk
+SciencePlots
+transformers
+xgboost

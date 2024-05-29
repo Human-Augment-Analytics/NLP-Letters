@@ -1,0 +1,7 @@
+pandas
+numpy
+pillow
+spacy
+matplotlib
+pillow
+wordcloud

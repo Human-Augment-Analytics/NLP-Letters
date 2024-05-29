@@ -9,5 +9,13 @@ ments.txt –upgrade`
 * Run: `python eda.py`
 
 
+# Conda Environment Setup
+
+1. Install Anaconda https://docs.anaconda.com/free/anaconda/install/
+2. Create conda env `conda env create -f environment.yml`
+3. Activate environment `conda activate nlp-letters`
+
+
+
 # Flowchart
 ![flowchart](https://github.com/Human-Augment-Analytics/HAAG-Scripts-Repo/blob/main/Personal%20Folders/TomOrth/Week%201%20Code%20Submission%20(05.17.24)/eda.drawio.png)

@@ -1,6 +1,14 @@
-from sklearn.model_selection import train_test_split, validation_curve, ValidationCurveDisplay, StratifiedKFold
+from sklearn.model_selection import (
+    train_test_split,
+    validation_curve,
+    ValidationCurveDisplay,
+    StratifiedKFold
+)
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import (
+    CountVectorizer,
+    TfidfTransformer
+)
 
 from nltk import tokenize
 import nltk
@@ -17,6 +25,11 @@ import scienceplots
 
 plt.style.use('ieee')
 
+s1_s2 = True
+tfidf = False
+
+text_column = "full_text" if not s1_s2 else "s1_s2"
+
 def remove_stopwords(text: str) -> str:
     """Method to remove stopwords and other items from text,
 
@@ -32,6 +45,9 @@ def remove_stopwords(text: str) -> str:
     female_names = list(map(lambda name: name.lower(), names.words('female.txt')))
     male_names = list(map(lambda name: name.lower(), names.words('male.txt')))
     stopwords.extend(["first_name", "last_name", "middle_name", "mr", "ms", "mrs"])
+    stopwords.extend(female_names)
+    stopwords.extend(male_names)
+    stopwords = set(stopwords)
     return " ".join([word for word in text.split(" ") if word not in stopwords])
 
 dataset_path = "sentence_sets_trimmed.csv"
@@ -44,14 +60,17 @@ df = pd.read_csv(dataset_path, encoding='unicode_escape')
 
 # Preprocess
 df.replace(to_replace=r'[^\w\s]', value='', regex=True, inplace=True)
-df["full_text"] = df["full_text"].apply(remove_stopwords)
+df[text_column] = df[text_column].apply(remove_stopwords)
 
 train, test = train_test_split(df, test_size=0.2, random_state=random_state)
-train_x = train["full_text"]
+train_x = train[text_column]
 train_y = train["applicant_gender"]
 
 count_vectorizer = CountVectorizer()
 train_x_processed = count_vectorizer.fit_transform(train_x)
+if tfidf:
+    train_x_processed = TfidfTransformer().fit_transform(train_x_processed)
+
 
 rf = RandomForestClassifier(ccp_alpha=0.001, class_weight="balanced")
 cv = StratifiedKFold()
@@ -68,4 +87,4 @@ display = ValidationCurveDisplay.from_estimator(
 )
 display.plot()
 plt.title(f"Validation Curve for n_estimators parameter")
-plt.savefig(Path(save_path) / f"rf_tune.png", bbox_inches="tight")
+plt.savefig(Path(save_path) / f"rf_tune_{text_column}_{'tfidf' if tfidf else 'count'}.png", bbox_inches="tight")

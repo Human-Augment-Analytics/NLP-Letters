@@ -6,5 +6,6 @@ pillow
 wordcloud
 nltk
 SciencePlots
-transformers
+transformers==4.21.3
+setfit==1.0.3
 xgboost

@@ -8,6 +8,13 @@ the same folder
 ments.txt –upgrade`
 * Run: `python eda.py`
 
+# Running expermiments
+
+* python final_experiments.py -model svm -dataset full_text -preprocessing replace 
+* python final_experiments.py -model svm -dataset s1_s2 -preprocessing replace 
+* python final_experiments.py -model rf -dataset full_text -preprocessing replace 
+* python final_experiments.py -model rf -dataset s1_s2 -preprocessing replace 
+
 
 # Conda Environment Setup
 

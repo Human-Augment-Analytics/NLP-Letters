@@ -14,3 +14,9 @@ dependencies:
   - xgboost
   - jupyter
   - spacy
+  - datasets
+  - torchvision
+  - pytorch::pytorch
+  - torchaudio
+  - accelerate
+  - lime

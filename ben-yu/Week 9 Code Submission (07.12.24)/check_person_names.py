@@ -6,7 +6,7 @@ nlp = spacy.load('en_core_web_sm')
 nltk.download("names")
 
 
-dataset_path = "../../data/sentence_sets_trimmed.csv"
+dataset_path = "../../data/charlotte_dataset_final.csv"
 
 # Load dataset
 df = pd.read_csv(dataset_path, encoding='unicode_escape')
@@ -19,7 +19,7 @@ nltk_names.extend(male_names)
 found_persons = []
 nltk_persons = []
 for index, row in df.iterrows():
-    doc = nlp(row['full_text'])
+    doc = nlp(row['TEXT'])
     persons = []
     nltk_hits = []
     for word in doc.ents:

@@ -10,6 +10,9 @@ from sklearn.metrics import (
     f1_score,
     accuracy_score,
     confusion_matrix,
+    matthews_corrcoef,
+    balanced_accuracy_score,
+    classification_report,
 )
 
 from pathlib import Path
@@ -34,16 +37,29 @@ import torch
 warnings.filterwarnings("ignore")
 plt.style.use('ieee')
 
-degender_map = {
-    ' mr ': ' ',
-    ' mrs ': ' ',
-    ' ms ': ' ',
+
+degender_pronouns = {
+    ' mr ': ' mx ',
+    ' mrs ': ' mx ',
+    ' ms ': ' mx ',
+    ' miss ': ' mx ',
+    ' mister ': ' mx ',
+}
+
+degender_nouns = {
     ' man ': ' person ',
     ' men ': ' persons ',
     ' woman ': ' person ',
     ' women ': ' persons ',
+    " man's ": " person's",
+    " men's ": " person's",
+    " woman's ": " person's",
+    " women's ": " person's",
+    " gentleman ": " person ",
+    " lady ": " person ",
+    " gentleman's ": " person's ",
+    " lady's ": " person's ",
 }
-
 
 
 # - Works on Google Colab - L4 due to RAM and GPU requirements
@@ -113,6 +129,22 @@ def train_distilbert(data_column):
     trainer.evaluate()
 
 
+def preprocess(df, data_column, preprocess_type):
+    if preprocess_type == 'none':
+        return df
+
+    D = degenderizer()
+    df[data_column] = df[data_column].apply(lambda x: D.degender(x) if len(x) > 5 else x)
+
+    for k, v in degender_pronouns.items():
+        df[data_column] = df[data_column].str.lower().replace(k,v)
+
+    if preprocess_type == 'all':
+        for k, v in degender_nouns.items():
+            df[data_column] = df[data_column].str.lower().replace(k,v)
+    return df
+
+
 def replace(df, data_column):
     D = degenderizer()
     df[data_column] = df[data_column].apply(lambda x: D.degender(x) if len(x) > 5 else x)
@@ -122,20 +154,21 @@ def replace(df, data_column):
     return df
 
 
-def main(model, text_column, preprocess):
+def main(model, text_column, preprocess_type):
 
-    dataset_path = "data/sentence_sets_trimmed.csv"
+    dataset_path = "data/charlotte_dataset_final.csv"
     random_state = 100
     save_path = "final_results"
     Path(save_path).mkdir(exist_ok=True)
+    label_column = "APPLICANT_GENDER"
+    labels = ['FEMALE','MALE']
 
     # Load dataset
     df = pd.read_csv(dataset_path, encoding='unicode_escape')
 
     # Preprocess
     df.replace(to_replace=r'[^\w\s]', value='', regex=True, inplace=True)
-    if preprocess == 'replace':
-        df = replace(df, text_column)
+    df = preprocess(df, text_column, preprocess_type)
 
     if model == "distilbert":
         train_distilbert(text_column)
@@ -145,11 +178,11 @@ def main(model, text_column, preprocess):
 
     train, test = train_test_split(df, test_size=0.2, random_state=random_state)
     train_x = train[text_column]
-    train_y = train["applicant_gender"]
+    train_y = train[label_column]
 
 
     test_x = test[text_column]
-    test_y = test["applicant_gender"]
+    test_y = test[label_column]
 
     count_vectorizer = CountVectorizer()
     train_x_processed = count_vectorizer.fit_transform(train_x)
@@ -159,14 +192,14 @@ def main(model, text_column, preprocess):
         best_parameters = {
             "kernel": "rbf",
             "C": 1,
-            "class_weight": {"female": 8, "male": 1},
+            "class_weight": {"FEMALE": 8, "MALE": 1},
         }
         clf = SVC(**best_parameters)
     if model == "rf":
         best_parameters = {
             "n_estimators": 10,
             "ccp_alpha": 0.001,
-            "class_weight": {"female": 8, "male": 1},
+            "class_weight": {"FEMALE": 8, "MALE": 1},
         }
         clf = RandomForestClassifier(**best_parameters)
     clf.fit(
@@ -175,7 +208,10 @@ def main(model, text_column, preprocess):
     predicted = clf.predict(test_x_processed)
     f1 = f1_score(predicted, test_y, average="macro")
     accuracy = accuracy_score(predicted, test_y)
-    print(f"model: {model}, dataset: {text_column}, Macro F1: {f1}, Accuracy: {accuracy}")
+    mcc = matthews_corrcoef(predicted, test_y)
+    balance_acc = balanced_accuracy_score(predicted, test_y)
+    print(f"model: {model}, dataset: {text_column}, Macro F1: {f1}, Accuracy: {accuracy}, MCC: {mcc}, Balanced Accuracy: {balance_acc}")
+    print(classification_report(predicted, test_y, target_names=labels))
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     def plot_confusion_matrix(cm, class_names):
 

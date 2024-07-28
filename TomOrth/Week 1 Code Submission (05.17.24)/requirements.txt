@@ -1,8 +1,0 @@
-pandas
-numpy
-pillow
-matplotlib
-pillow
-wordcloud
-nltk
-SciencePlots

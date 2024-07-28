@@ -1,19 +1,20 @@
-# Running script
+# NLP-letters
 
-* Assumption: python 3.9 is installed on the user machine and the
-command is `python`
-* Download eda.py, requirements.txt and CSV file linked above to
-the same folder
-* Install dependencies by running: `python -m pip install -r require-
-ments.txt –upgrade`
-* Run: `python eda.py`
+This contains code for the NLP-letters project.
+
+# Scripts
+
+Check `ben-yu` and `TomOrth` folders have individual scripts. Check their respective readmes for information
 
 # Running expermiments
 
+For shallow models:
 * python final_experiments.py -model svm -dataset full_text -preprocessing replace 
 * python final_experiments.py -model svm -dataset s1_s2 -preprocessing replace 
 * python final_experiments.py -model rf -dataset full_text -preprocessing replace 
 * python final_experiments.py -model rf -dataset s1_s2 -preprocessing replace 
+
+For BERT training, use `final_bert_training.py` or `Final_BERT_Training` notebook in Colab and comment and uncomment the sections of the script/notebook you need to run for the specific model.
 
 
 # Conda Environment Setup
@@ -21,8 +22,3 @@ ments.txt –upgrade`
 1. Install Anaconda https://docs.anaconda.com/free/anaconda/install/
 2. Create conda env `conda env create -f environment.yml`
 3. Activate environment `conda activate nlp-letters`
-
-
-
-# Flowchart
-![flowchart](https://github.com/Human-Augment-Analytics/HAAG-Scripts-Repo/blob/main/Personal%20Folders/TomOrth/Week%201%20Code%20Submission%20(05.17.24)/eda.drawio.png)

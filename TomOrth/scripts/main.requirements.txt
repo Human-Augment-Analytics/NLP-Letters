@@ -5,7 +5,9 @@ matplotlib
 pillow
 wordcloud
 nltk
+spacy
 SciencePlots
 transformers==4.21.3
 setfit==1.0.3
 xgboost
+openai

@@ -4,12 +4,12 @@ import nltk
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize
 
-dataset_path = "data/charlotte_dataset_final.csv"
+dataset_path = "data/results_TEXT_roberta-base-finetuned-nlp-letters-TEXT-pronouns-class-weighted.csv"
 random_state = 100
 save_path = "final_results"
 label_column = "APPLICANT_GENDER"
-text_column = "TEXT"
-labels = ['FEMALE','MALE']
+text_column = "Text"
+labels = ['female','male']
 
 
 nltk.download('punkt')
@@ -36,13 +36,18 @@ def get_adverbs(text):
 
 # Load dataset
 df = pd.read_csv(dataset_path, encoding='unicode_escape')
+#df = df[(df["Prediction"] == 'female') & (df["GT"] == 'female')] # True Positive
+#df = df[(df["Prediction"] == 'female') & (df["GT"] == 'male')] # False Negative
+#df = df[(df["Prediction"] == 'male') & (df["GT"] == 'female')] # False Positive
+#df = df[(df["Prediction"] == 'male') & (df["GT"] == 'male')] # True Negative
+
 total_adv_counts = Counter()
 
-female_letters = df.loc[df[label_column] == labels[0]]
+female_letters = df.loc[df['Prediction'] == 'female']
 female_adj_counts = Counter()
 female_adv_counts = Counter()
 
-male_letters = df.loc[df[label_column] == labels[1]]
+male_letters = df.loc[df['Prediction'] == 'male']
 male_adj_counts = Counter()
 male_adv_counts = Counter()
 
@@ -82,13 +87,13 @@ male_pcts = sorted(male_pcts, key=lambda tup: tup[1],reverse=True)
 print("Top Male adv by cond. prob: {}".format(male_pcts[:25]))
 
 #for x in range(len(female_letters[text_column])):
-#    adjs = get_adjectives(female_letters[text_column].iloc[x])
+#    adjs = get_adverbs(female_letters[text_column].iloc[x])
 #    female_adj_counts.update(adjs)
 #
 #print("Top 25 adjectives in female applicant text: {}".format(female_adj_counts.most_common(25)))
 #
 #for x in range(len(male_letters[text_column])):
-#    adjs = get_adjectives(male_letters[text_column].iloc[x])
+#    adjs = get_adverbs(male_letters[text_column].iloc[x])
 #    male_adj_counts.update(adjs)
 #
 #print("Top 25 adjectives in male applicant text: {}".format(male_adj_counts.most_common(25)))

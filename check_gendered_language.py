@@ -29,25 +29,34 @@ import warnings
 import re
 import sys
 
-dataset_path = "/Users/thomasorth/Downloads/results_s1_s2_roberta-base-finetuned-nlp-letters-s1_s2-pronouns-class-weighted.csv"
 random_state = 100
 
 # Load dataset
-df = pd.read_csv(dataset_path, encoding='unicode_escape')
-df = df[df["Prediction"] != df["GT"]]
+for data_type in ["TEXT", "s1_s2"]:
+    for subset in ["TP", "FP", "FN", "TN"]:
+        dataset_path = f"/Users/thomasorth/Downloads/results_{data_type}_roberta-base-finetuned-nlp-letters-{data_type}-all-class-weighted.csv"
+        df = pd.read_csv(dataset_path, encoding='unicode_escape')
+        df.replace(to_replace=r'[^\w\s]', value='', regex=True, inplace=True)
+        if subset == "TP":
+            df = df[(df["Prediction"] == 'female') & (df["GT"] == 'female')]
+        if subset == "FP":
+            df = df[(df["Prediction"] == 'male') & (df["GT"] == 'female')]
+        if subset == "FN":
+            df = df[(df["Prediction"] == 'female') & (df["GT"] == 'male')]
+        if subset == "TN":
+            df = df[(df["Prediction"] == 'male') & (df["GT"] == 'male')]
 
-gendered_words = ["they", "them", "their", "themself", "mx", "person", "person's"]
+        gendered_words = ["they", "them", "their", "themself", "mx", "person", "person's"]
 
-def masked_langauge(text: str):
-    letter_words = text.split()
-    words = [w for w in letter_words if w in gendered_words]
-    return len(words)
+        def masked_langauge(text: str):
+            letter_words = text.split()
+            words = [w for w in letter_words if w in gendered_words]
+            return len(words)
 
-# Preprocess
-df.replace(to_replace=r'[^\w\s]', value='', regex=True, inplace=True)
-df["count"] = df["Text"].apply(lambda letter: len(letter.split()))
-df["masked_lang"] = df["Text"].apply(masked_langauge)
-df["percent_gendered"] = df["masked_lang"] / df["count"]
+        # Preprocess
+        df["count"] = df["Text"].apply(lambda letter: len(letter.split()))
+        df["masked_lang"] = df["Text"].apply(masked_langauge)
+        df['percent_gendered'] = df["masked_lang"] / df["count"]
 
-print("Male count", df[df["GT"] == "male"]["percent_gendered"].mean())
-print("Female count", df[df["GT"] == "female"]["percent_gendered"].mean())
+        print(f"{data_type}, {subset}", f"Mean: {df['percent_gendered'].mean()}", f"Median: {df['percent_gendered'].median()}", f"Mode: {df['percent_gendered'].mode().mean()}")
+        print()
